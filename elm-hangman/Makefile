@@ -3,7 +3,6 @@ ELM_MAKE_FLAGS =
 .PHONY=all
 all: public/index.html public/elm.js
 
-release: ELM_MAKE_FLAGS += --optimize
 release: all
 
 debug: ELM_MAKE_FLAGS += --debug
