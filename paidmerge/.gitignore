@@ -2,6 +2,7 @@
 node_modules
 /dist
 target/
+pkg/
 
 # local env files
 .env.local

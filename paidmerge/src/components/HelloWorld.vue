@@ -112,6 +112,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
+import * as wasm from "wasm";
 
 @Component
 export default class HelloWorld extends Vue {
