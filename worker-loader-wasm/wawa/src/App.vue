@@ -8,13 +8,23 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import HelloWorld from './components/HelloWorld.vue';
+import Worker from 'worker-loader!@/worker.ts';
 
 @Component({
   components: {
     HelloWorld,
   },
 })
-export default class App extends Vue {}
+export default class App extends Vue {
+
+  mounted() {
+    const worker = new Worker();
+
+    worker.postMessage("Good day!");
+    worker.onmessage = (event: any) => { console.log(event.data); };
+  }
+
+}
 </script>
 
 <style>
