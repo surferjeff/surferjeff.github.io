@@ -1,11 +1,16 @@
-import * as wasm from "@/../wasm/pkg/wawasm";
+import("@/../wasm/pkg").then(wasm => {
 
-const ctx: Worker = self as any;
+    const ctx: Worker = self as any;
 
-// Post data to parent thread
-ctx.postMessage('Hi.');
+    // Post data to parent thread
+    ctx.postMessage('Hi.');
 
-// Respond to message from parent thread
-ctx.addEventListener('message', (event) => console.log(event.data));
+    // Respond to message from parent thread
+    ctx.addEventListener('message', (event) => {
+        // Echo the message back.
+        ctx.postMessage("Worker received a message.");
+    });
 
-const hoagie = new wasm.Hoagie(42);
+    const hoagie = new wasm.Hoagie(42);
+
+});

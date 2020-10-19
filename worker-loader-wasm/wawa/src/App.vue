@@ -20,8 +20,9 @@ export default class App extends Vue {
   mounted() {
     const worker = new Worker();
 
-    worker.postMessage("Good day!");
     worker.onmessage = (event: any) => { console.log(event.data); };
+
+    window.setTimeout(() => { worker.postMessage("Good day!"); }, 2000);
   }
 
 }
