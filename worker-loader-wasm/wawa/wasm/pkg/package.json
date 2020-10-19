@@ -1,0 +1,15 @@
+{
+  "name": "wawasm",
+  "collaborators": [
+    "jeff"
+  ],
+  "version": "0.1.0",
+  "files": [
+    "wawasm_bg.wasm",
+    "wawasm.js",
+    "wawasm.d.ts"
+  ],
+  "module": "wawasm.js",
+  "types": "wawasm.d.ts",
+  "sideEffects": false
+}
