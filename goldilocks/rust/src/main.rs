@@ -2,25 +2,28 @@ fn main() {
     println!("Hello, world!");
 }
 
-struct Url {
-    protocol: String,
-    host_name: String,
-    port: Option<u16>,
-    path: String
+pub struct NumberStack {
+    numbers: Vec<u32>,
 }
 
-impl Url {
-    fn incr_port(&mut self) {
-        if let Some(mut port_number) = self.port {
-            port_number += 1;
-        }
+impl NumberStack {
+    pub fn new() -> NumberStack {
+        NumberStack { numbers: Vec::new() }
+    }
+
+    pub fn empty(&self) -> bool {
+        self.numbers.is_empty()
+    }
+
+    pub fn push(&mut self, n: u32) {
+        self.numbers.push(n)
+    }
+
+    pub fn pop(&mut self) -> Option<u32> {
+        self.numbers.pop()
+    }
+
+    pub fn peek(&self) -> Option<u32> {
+        self.numbers.last().copied()
     }
 }
-
-struct ComponentSymbols {}
-trait PropertySymbol {}
-
-// fn IsParameter(symbols: &ComponentSymbols, property: &dyn PropertySymbol) -> bool {
-//     property.attributes.any(|a| {a.class == symbols.parameter})
-// }
-
