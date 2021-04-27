@@ -5,9 +5,11 @@ fn main() {
         port: Some(80),
         path: String::new()
     };
+    let url2 = url.clone();
     println!("{:?}", url);
     url.incr_port();
     println!("{:?}", url);
+    println!("url == url2? {}", url == url2);
 }
 
 #[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Hash, Default, Debug)]
