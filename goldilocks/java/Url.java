@@ -11,7 +11,7 @@ public class Url {
         this.path = path;
     }
 
-    // How do I implement clone(), equals(), compare(), and hash, and printing a
+    // How do I implement clone(), equals(), compare(), and hash(), and printing a
     // a debug string that looks something like this:
     // Url { protocol: "http", host_name: "www.google.com", port: 80, path: "" }
     public static void main(String[] args) {
