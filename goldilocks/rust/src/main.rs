@@ -1,29 +1,25 @@
 fn main() {
+    let mut url = Url {
+        protocol: "http".into(),
+        host_name: "www.google.com".into(),
+        port: None,
+        path: String::new()
+    };
+    url.incr_port();
     println!("Hello, world!");
 }
 
-pub struct StringStack {
-    numbers: Vec<String>,
+struct Url {
+    protocol: String,
+    host_name: String,
+    port: Option<u16>,
+    path: String
 }
 
-impl StringStack {
-    pub fn new() -> StringStack {
-        StringStack { numbers: Vec::new() }
-    }
-
-    pub fn empty(&self) -> bool {
-        self.numbers.is_empty()
-    }
-
-    pub fn push(&mut self, s: String) {
-        self.numbers.push(s)
-    }
-
-    pub fn pop(&mut self) -> Option<String> {
-        self.numbers.pop()
-    }
-
-    pub fn peek(&self) -> Option<String> {
-        self.numbers.last().cloned()
+impl Url {
+    fn incr_port(&mut self) {
+        if let Some(mut port_number) = self.port {
+            port_number += 1;
+        }
     }
 }
