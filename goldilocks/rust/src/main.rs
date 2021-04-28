@@ -1,6 +1,7 @@
 use std::collections::{BTreeSet, HashSet};
+use serde::{Serialize, Deserialize};
 
-fn main() {
+fn main() -> serde_json::error::Result<()> {
     let url = Url::default();
     let mut url = Url {
         protocol: "http".into(),
@@ -20,9 +21,13 @@ fn main() {
     println!("{:?}", url);
     println!("url == url2? {}", url == url2);
     println!("url > url2? {}", url > url2);
+
+    let text = serde_json::to_string(&url)?;
+    let url2 = serde_json::from_str(&text)?;
+    Ok(())
 }
 
-#[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Hash, Default, Debug)]
+#[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Hash, Default, Debug, Serialize, Deserialize)]
 struct Url {
     protocol: String,
     host_name: String,
