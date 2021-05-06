@@ -9,6 +9,13 @@ fn main() -> serde_json::error::Result<()> {
         port: Some(80),
         path: String::new()
     };
+
+    for _ in 0..10 {
+        let response = fetch(&mut url)?;
+        println!("{}", response);
+        url.incr_port();
+    }
+
     let url2 = url.clone();
     let url3 = url.clone();
     let url4 = url.clone();
@@ -18,13 +25,22 @@ fn main() -> serde_json::error::Result<()> {
     urls.insert(url4);
     println!("{:?}", url);
     url.incr_port();
-    println!("{:?}", url);
+    println!("{}", url);
     println!("url == url2? {}", url == url2);
     println!("url > url2? {}", url > url2);
 
     let text = serde_json::to_string(&url)?;
-    let url2 = serde_json::from_str(&text)?;
+    let url2: Url = serde_json::from_str(&text)?;
+
+    println!("Hi {}, my favorite number is {}.", "Jeff", 42);
+
+
+
     Ok(())
+}
+
+fn fetch(url: &Url) -> Result<String, serde_json::Error> {
+    Ok(String::default())
 }
 
 #[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Hash, Default, Debug, Serialize, Deserialize)]
