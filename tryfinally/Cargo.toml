@@ -1,5 +1,5 @@
 [package]
-name = "py2format"
+name = "tryfinally"
 version = "0.1.0"
 authors = ["Jeffrey Rennie <surferjeff@gmail.com>"]
 edition = "2018"
