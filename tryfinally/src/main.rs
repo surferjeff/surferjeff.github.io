@@ -1,7 +1,7 @@
 use std::io::{self, Read, Seek, SeekFrom, Write};
 use std::fs::File;
 
-
+/// try {} finally {} construct from other languages.
 macro_rules! tryf {
     ($tblock:block finally $fblock:block) => {
         {
@@ -22,6 +22,8 @@ fn main() {
     x.unwrap();
 }
 
+/// Reads bytes from a file, but always returns the file pointer back to the
+/// original offset, even when an error is returned.
 fn peek_file(f: &mut File, buffer: &mut [u8]) -> io::Result<()>
 {
     let offset = f.seek(SeekFrom::Current(0))?;
@@ -53,7 +55,7 @@ pub mod tests {
         peek_file(&mut f, &mut buf).unwrap();
         assert_eq!(b"Hello", &buf);
 
-        // Try an read that's too big and will fail.
+        // Try a read that's too big and will fail.
         let mut big_buf = [0u8; 100];
         assert!(peek_file(&mut f, &mut big_buf).is_err());
 
