@@ -1,19 +1,25 @@
-use std::io::{self, Read, Seek, SeekFrom};
+use std::io::{self, Read, Seek, SeekFrom, Write};
 use std::fs::File;
 
 
 macro_rules! tryf {
     ($tblock:block finally $fblock:block) => {
-        
+        {
+            let mut __try = || -> Result<_, _> { $tblock };
+            let  __result = __try();
+            { $fblock };
+            __result
+        }
     };
 }
 
 fn main() {
-    tryf!{{
-        println!("hello");
+    let x = tryf!{{
+        io::stdout().write_all(b"hello\n")
     } finally {
         println!("world");
     }};
+    x.unwrap();
 }
 
 
