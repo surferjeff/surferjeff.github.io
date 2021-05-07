@@ -6,15 +6,11 @@ fn main() {
     println!("Hello, world!");
 }
 
-fn dump(f: &mut File) -> io::Result<()>
+fn peek_file(f: &mut File, buffer: &mut [u8]) -> io::Result<()>
 {
     let offset = f.seek(SeekFrom::Current(0))?;
     let mut __try = || -> Result<_, _> {
-        let mut buffer = vec![0u8; 100];
-        f.read_exact(&mut buffer)?;
-        f.read_exact(&mut buffer)?;
-        f.read_exact(&mut buffer)?;
-        Ok(())
+        f.read_exact(buffer)
     };
     let result = __try();
     f.seek(SeekFrom::Start(offset))?;
