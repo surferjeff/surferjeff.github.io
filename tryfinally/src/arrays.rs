@@ -24,4 +24,10 @@ fn demo() {
     // Convert a vector of references into an array of references.
     // Drops any excess capacity.
     let a = v.into_boxed_slice();
+
+    // Create an array with a scattering of references.
+    let mut scattered = [None; 10];
+    scattered[2] = Some(&x);
+    scattered[5] = Some(&y);
+    scattered[6] = Some(&y);
 }
