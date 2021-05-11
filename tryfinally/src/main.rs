@@ -1,6 +1,8 @@
 use std::io::{self, Read, Seek, SeekFrom, Write};
 use std::fs::File;
 
+mod arrays;
+
 /// try {} finally {} construct from other languages.
 macro_rules! tryf {
     ($tblock:block finally $fblock:block) => {
