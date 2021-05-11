@@ -30,4 +30,11 @@ fn demo() {
     scattered[2] = Some(&x);
     scattered[5] = Some(&y);
     scattered[6] = Some(&y);
+
+    // Allocate the elements of the array on the heap instead of in-place in the array.
+    // After https://github.com/rust-lang/rust/issues/49147 is fixed, I'll be able to
+    // simply write `let mut heap = [None; 10];`
+    let mut heap = <[_; 10]>::default();
+    heap[2] = Some(Box::new(7));
+    heap[5] = Some(Box::new(3));
 }
