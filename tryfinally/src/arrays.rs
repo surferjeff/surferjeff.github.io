@@ -16,7 +16,7 @@ fn demo() {
     v.push(&x);
     v.push(&y);
 
-    // Incrementally create a vector of references with known size.
+    // Incrementally create a vector of references with predictable size.
     let mut v = Vec::with_capacity(2);
     v.push(&x);
     v.push(&y);
