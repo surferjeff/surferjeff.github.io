@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<head>
+    <title>HTMX Swap Gallery</title>
+    <style>
+
+button {
+    font-size: 20px;
+    background: blue;
+    color: white;
+    padding: 3px;
+}
+
+.gallery-form {
+    background: lightgray;
+    padding: 2em;
+    display: inline-block;
+    margin: 0.5em;
+}
+
+.gallery-form button {
+    min-width: 10em;
+}
+
+.hello {
+    background: yellow;
+    border: 1px solid brown;
+    color: black;
+}
+
+    </style>
+</head>
+
+<body>    
+    <p>A gallery of <a  target="_blank" href="https://htmx.org/attributes/hx-swap/"
+        >hx-swap</a> options.</p>
+    
+    <div class="gallery-form">
+        <button class="btn btn-primary" hx-target="this"
+            hx-get="./hello.html" hx-swap="innerHtml">innerHtml</button>
+    </div>
+    
+    <div class="gallery-form">
+        <button class="btn btn-primary" hx-target="this"
+            hx-get="./hello.html" hx-swap="outerHtml">outerHtml</button>
+    </div>
+    
+    <div class="gallery-form" id="wrapper">
+        <button class="btn btn-primary" hx-target="#wrapper"
+            hx-get="./hello.html" hx-swap="innerHtml">simulated<br>outerHtml</button>
+    </div>
+    
+    <div class="gallery-form">
+        <button class="btn btn-primary" hx-target="this"
+            hx-get="./hello.html" hx-swap="textContent">textContent</button>
+    </div>
+    
+    <div class="gallery-form">
+        <button class="btn btn-primary" hx-target="this"
+            hx-get="./hello.html" hx-swap="beforebegin">beforebegin</button>
+    </div>
+    
+    <div class="gallery-form">
+        <button class="btn btn-primary" hx-target="this"
+            hx-get="./hello.html" hx-swap="afterbegin">afterbegin</button>
+    </div>
+    
+    <div class="gallery-form">
+        <button class="btn btn-primary" hx-target="this"
+            hx-get="./hello.html" hx-swap="beforeend">beforeend</button>
+    </div>
+    
+    <div class="gallery-form">
+        <button class="btn btn-primary" hx-target="this"
+            hx-get="./hello.html" hx-swap="afterend">afterend</button>
+    </div>
+    
+    <div class="gallery-form">
+        <button class="btn btn-primary" hx-target="this"
+            hx-get="./hello.html" hx-swap="delete">delete</button>
+    </div>
+    
+    <div class="gallery-form">
+        <button class="btn btn-primary" hx-target="this"
+            hx-get="./hello.html" hx-swap="none">none</button>
+    </div>
+    
+    <script src="./htmx-2.0.4.js"></script>
+</body>
