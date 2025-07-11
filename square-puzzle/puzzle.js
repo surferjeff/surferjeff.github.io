@@ -225,7 +225,7 @@ async function solveIt() {
     el.style.top = "520px";
 }
 
-if (process?.versions?.node) {
+if (typeof(process) !== 'undefined' && process?.versions?.node) {
     // Solve the puzzle, and writes the solution to the console.
     const steps = reverseSolution(solve(start));
     for (const [i, step] of steps.entries()) {
