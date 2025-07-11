@@ -319,7 +319,7 @@
         const MASTER_BLOCK_ID = 1;
 
         // Add a limit to the number of states visited to prevent memory issues
-        const MAX_VISITED_STATES = 500000; // Adjust this value as needed for performance vs. solution depth
+        const MAX_VISITED_STATES = 1000000; // Increased limit for A*
 
         // DOM elements
         const boardContainer = document.getElementById('board-container');
@@ -409,6 +409,17 @@
         }
 
         /**
+         * Calculates the Manhattan distance heuristic for the master block.
+         * @param {object} blocks - Current positions of all blocks.
+         * @returns {number} The heuristic value.
+         */
+        function calculateHeuristic(blocks) {
+            const masterBlock = blocks[MASTER_BLOCK_ID];
+            // Manhattan distance for the top-left corner of the master block to its goal
+            return Math.abs(masterBlock.row - GOAL_MASTER_POS.row) + Math.abs(masterBlock.col - GOAL_MASTER_POS.col);
+        }
+
+        /**
          * Gets all possible next states from a given puzzle state.
          * @param {object} currentState - The current state of the puzzle ({blocks, grid, path}).
          * @returns {Array<{newBlocks: object, newGrid: number[][], moveDescription: string}>} An array of possible next states.
@@ -480,15 +491,8 @@
             messageDisplay.className = `message ${type}`;
         }
 
-        const fingerprintMap = [ '0', '1', '2', '2', '2', '2', '6',
-            '7', '7', '7', '7' ];
-
-        function fingerprint(grid) {
-            return grid.flatMap(row => row.map(n => fingerprintMap[n])).join('');
-        }
-
         /**
-         * Solves the puzzle using Breadth-First Search (BFS).
+         * Solves the puzzle using A* Search algorithm.
          */
         function solvePuzzle() {
             if (isSolving) return;
@@ -501,43 +505,76 @@
             solutionControls.style.display = 'none';
             solutionStepsList.innerHTML = '';
 
-            const queue = [{
-                blocks: JSON.parse(JSON.stringify(INITIAL_BLOCK_POSITIONS)),
-                grid: generateGridFromBlocks(INITIAL_BLOCK_POSITIONS),
+            const openSet = []; // Priority queue (stores {f, g, h, blocks, grid, path})
+            const gScore = new Map(); // Stores the lowest g-score found to reach a grid state
+
+            const startBlocks = JSON.parse(JSON.stringify(INITIAL_BLOCK_POSITIONS));
+            const startGrid = generateGridFromBlocks(startBlocks);
+            const startGridString = JSON.stringify(startGrid);
+
+            const startNode = {
+                blocks: startBlocks,
+                grid: startGrid,
+                g: 0, // Cost from start
+                h: calculateHeuristic(startBlocks), // Heuristic estimate to goal
                 path: []
-            }];
-            const visited = new Set();
-            visited.add(fingerprint(generateGridFromBlocks(INITIAL_BLOCK_POSITIONS)));
+            };
+            startNode.f = startNode.g + startNode.h; // Total estimated cost
+
+            openSet.push(startNode);
+            gScore.set(startGridString, 0);
 
             let foundSolution = false;
             let finalSolutionPath = [];
 
             const processQueue = () => {
                 const startTime = performance.now();
-                while (queue.length > 0 && (performance.now() - startTime < 100) && visited.size < MAX_VISITED_STATES) {
-                    const { blocks, grid, path } = queue.shift();
+                let statesProcessedInSlice = 0;
+
+                // Continue processing as long as there are states in the openSet,
+                // time slice is not exceeded, and visited states are within limit
+                while (openSet.length > 0 && (performance.now() - startTime < 100) && gScore.size < MAX_VISITED_STATES) {
+                    // Sort openSet to get the node with the lowest f-score (simulates priority queue)
+                    openSet.sort((a, b) => a.f - b.f);
+                    const currentNode = openSet.shift(); // Get the node with the lowest f-score
+
+                    const { blocks, grid, g, path } = currentNode;
+                    const currentGridString = JSON.stringify(grid);
+
+                    // If we found a shorter path to this state already and this one is worse, skip
+                    if (g > gScore.get(currentGridString)) {
+                        continue;
+                    }
 
                     if (isGoalState(blocks)) {
                         foundSolution = true;
                         finalSolutionPath = path;
-                        break;
+                        break; // Solution found, exit loop
                     }
 
                     const moves = getPossibleMoves({ blocks, grid });
                     for (const move of moves) {
-                        const newBlocks = move.newBlocks;
-                        const newGrid = move.newGrid;
-                        const newGridString = fingerprint(newGrid);
+                        const neighborBlocks = move.newBlocks;
+                        const neighborGrid = move.newGrid;
+                        const neighborGridString = JSON.stringify(neighborGrid);
+                        const newG = g + 1; // Each move costs 1
 
-                        if (!visited.has(newGridString)) {
-                            visited.add(newGridString);
-                            queue.push({
-                                blocks: newBlocks,
-                                grid: newGrid,
+                        // If this path to neighbor is shorter than any previously found path
+                        if (newG < (gScore.has(neighborGridString) ? gScore.get(neighborGridString) : Infinity)) {
+                            gScore.set(neighborGridString, newG); // Update with the new, shorter g-score
+                            const neighborH = calculateHeuristic(neighborBlocks);
+                            const neighborF = newG + neighborH;
+                            openSet.push({
+                                blocks: neighborBlocks,
+                                grid: neighborGrid,
+                                g: newG,
+                                h: neighborH,
+                                f: neighborF,
                                 path: [...path, move.moveDescription]
                             });
                         }
                     }
+                    statesProcessedInSlice++;
                 }
 
                 if (foundSolution) {
@@ -548,21 +585,22 @@
                     updateSolutionDisplay();
                     solutionControls.style.display = 'block';
                     applySolutionStep(0); // Show initial state
-                } else if (queue.length === 0) {
+                } else if (openSet.length === 0) {
                     displayMessage('No solution found for this configuration.', 'warning');
                     isSolving = false;
                     solveButton.disabled = false;
-                } else if (visited.size >= MAX_VISITED_STATES) {
-                    displayMessage(`Search limit (${MAX_VISITED_STATES} states) reached. No solution found within this limit.`, 'warning');
+                } else if (gScore.size >= MAX_VISITED_STATES) {
+                    displayMessage(`Search limit (${MAX_VISITED_STATES} states) reached. No solution found within this limit. This puzzle might be very complex or unsolvable.`, 'warning');
                     isSolving = false;
                     solveButton.disabled = false;
                 }
                 else {
-                    setTimeout(processQueue, 10); // Continue processing in next tick
+                    // Continue processing in the next tick if not solved and limits not reached
+                    setTimeout(processQueue, 10);
                 }
             };
 
-            processQueue(); // Start the BFS
+            processQueue(); // Start the A* search
         }
 
         /**
