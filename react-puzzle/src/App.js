@@ -227,7 +227,7 @@ function App() {
         };
 
         processQueue(); // Start the BFS
-    }, [getPossibleMoves, isGoalState]);
+    }, [getPossibleMoves, isGoalState, solveStart]);
 
     // Apply solution step
     useEffect(() => {
