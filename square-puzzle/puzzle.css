@@ -18,65 +18,43 @@ main {
 }        
 
 #A {
-    top: 5px;
-    left: 5px;
     background: pink;
 }
 
 #B {
-    top: 5px;
-    left: 105px;
     background: cornflowerblue;
     color: white;
 }
 
 #C {
-    top: 5px;
-    left: 305px;
     background: bisque;
 }
 
 #D {
-    top: 205px;
-    left: 5px;
     background: lawngreen;
 }
 
 #E {
-    top: 205px;
-    left: 105px;
     background: mistyrose;
 }
 
 #F {
-    top: 205px;
-    left: 305px;
     background: plum;
 }
 
 #G {
-    top: 305px;
-    left: 105px;
     background: turquoise;
 }
 
-
 #H {
-    top: 305px;
-    left: 205px;
     background: violet;
 }
 
 #I {
-    top: 405px;
-    left: 5px;
     background: lavenderblush;
 }
 
-
 #J {
-    top: 405px;
-    left: 305px;
     background: khaki;
 }
 
