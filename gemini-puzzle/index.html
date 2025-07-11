@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Square Root Puzzle Solver</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1a202c;
+            --text-light: #f7fafc;
+            --gray-700: #4a5568;
+            --gray-800: #2d3748;
+            --red-500: #ef4444;
+            --blue-500: #3b82f6;
+            --green-500: #10b981;
+            --teal-600: #0d9488;
+            --purple-400: #a78bfa;
+            --pink-600: #db2777;
+            --purple-600: #9333ea;
+            --purple-700: #7e22ce;
+            --green-400: #4ade80;
+            --yellow-400: #facc15;
+            --blue-300: #93c5fd;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, var(--purple-400), var(--pink-600));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            width: 100%;
+            max-width: 900px; /* Limit overall width */
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: center;
+            }
+        }
+
+        .board-grid-container {
+            display: grid;
+            gap: 2px; /* gap-0.5 in Tailwind is 2px */
+            background-color: var(--gray-700);
+            padding: 4px; /* p-1 in Tailwind is 4px */
+            border-radius: 0.5rem; /* rounded-lg in Tailwind is 0.5rem */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+        }
+
+        .board-cell {
+            background-color: var(--gray-800);
+            border-radius: 0.125rem; /* rounded-sm */
+        }
+
+        .block {
+            position: relative;
+            border-radius: 0.375rem; /* rounded-md */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-weight: 700;
+            font-size: 1.125rem; /* text-lg */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            transition: all 300ms ease-in-out;
+        }
+
+        .block.master-block {
+            background-color: var(--red-500);
+        }
+
+        .block.other-block-even {
+            background-color: var(--blue-500);
+        }
+
+        .block.other-block-odd {
+            background-color: var(--green-500);
+        }
+
+        .block.goal-position {
+            border: 4px solid var(--green-400);
+        }
+
+        .master-star {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem; /* text-3xl */
+            font-weight: 800; /* font-extrabold */
+            opacity: 0.75;
+        }
+
+        .block-id {
+            position: relative;
+            z-index: 10;
+        }
+
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .controls-section {
+                align-items: flex-start;
+            }
+        }
+
+        button {
+            padding: 0.75rem 2rem; /* px-8 py-3 */
+            border-radius: 9999px; /* rounded-full */
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+            transition: all 300ms ease-in-out;
+            border: none;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        button:not(:disabled) {
+            background: linear-gradient(to right, var(--green-500), var(--teal-600));
+        }
+
+        button:not(:disabled):hover {
+            background: linear-gradient(to right, #059669, #0f766e); /* Darker shades for hover */
+            transform: scale(1.05);
+        }
+
+        button:disabled {
+            background-color: var(--gray-600);
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .message {
+                text-align: left;
+            }
+        }
+
+        .message.success {
+            color: var(--green-400);
+        }
+
+        .message.warning {
+            color: var(--yellow-400);
+        }
+
+        .solution-box {
+            margin-top: 1.5rem;
+            width: 100%;
+            max-width: 28rem; /* max-w-md */
+            background-color: var(--gray-800);
+            padding: 1.5rem; /* p-6 */
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-xl */
+        }
+
+        .solution-box h2 {
+            font-size: 1.5rem; /* text-2xl */
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: var(--blue-300);
+        }
+
+        .solution-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .solution-nav button {
+            padding: 0.5rem 1rem; /* px-4 py-2 */
+            background-color: var(--purple-600);
+            border-radius: 0.375rem; /* rounded-md */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow-md */
+            transition: background-color 150ms ease-in-out;
+        }
+
+        .solution-nav button:hover:not(:disabled) {
+            background-color: var(--purple-700);
+        }
+
+        .solution-nav button:disabled {
+            background-color: var(--gray-600);
+            cursor: not-allowed;
+        }
+
+        .solution-nav span {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600;
+        }
+
+        .solution-steps-list {
+            max-height: 15rem; /* max-h-60 */
+            overflow-y: auto;
+            font-size: 0.875rem; /* text-sm */
+            color: #d1d5db; /* gray-300 */
+        }
+
+        .solution-steps-list p {
+            padding: 0.5rem; /* p-2 */
+            border-radius: 0.375rem; /* rounded-md */
+            transition: background-color 150ms ease-in-out;
+        }
+
+        .solution-steps-list p:hover:not(.active-step) {
+            background-color: var(--gray-700);
+        }
+
+        .solution-steps-list p.active-step {
+            background-color: var(--purple-700);
+            color: var(--text-light);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <h1>The Square Root Puzzle</h1>
+
+    <div class="container">
+        <div id="board-container" class="board-grid-container">
+            <!-- Puzzle board will be rendered here by JavaScript -->
+        </div>
+
+        <div class="controls-section">
+            <button id="solve-button">Solve Puzzle</button>
+            <p id="message" class="message"></p>
+
+            <div id="solution-controls" class="solution-box" style="display: none;">
+                <h2>Solution Steps (<span id="total-steps">0</span>)</h2>
+                <div class="solution-nav">
+                    <button id="prev-step-button">Previous</button>
+                    <span id="current-step-display">Step 0 / 0</span>
+                    <button id="next-step-button">Next</button>
+                </div>
+                <div id="solution-steps-list" class="solution-steps-list">
+                    <!-- Solution steps will be listed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Board dimensions
+        const ROWS = 5;
+        const COLS = 4;
+
+        // Define block types and their dimensions
+        const BLOCK_TYPES = {
+            1: { width: 2, height: 2, name: 'Master Block' }, // The main 2x2 block (B)
+            2: { width: 1, height: 2, name: 'Vertical Block A' }, // (A)
+            3: { width: 1, height: 2, name: 'Vertical Block C' }, // (C)
+            4: { width: 1, height: 2, name: 'Vertical Block D' }, // (D)
+            5: { width: 1, height: 2, name: 'Vertical Block F' }, // (F)
+            6: { width: 2, height: 1, name: 'Horizontal Block E' }, // (E)
+            7: { width: 1, height: 1, name: 'Small Block G' }, // (G)
+            8: { width: 1, height: 1, name: 'Small Block H' }, // (H)
+            9: { width: 1, height: 1, name: 'Small Block I' }, // (I)
+            10: { width: 1, height: 1, name: 'Small Block J' }, // (J)
+        };
+
+        // Initial state of the puzzle based on the user's new layout
+        const INITIAL_BLOCK_POSITIONS = {
+            1: { id: 1, row: 0, col: 1 }, // Master Block (B)
+            2: { id: 2, row: 0, col: 0 }, // Vertical Block A
+            3: { id: 3, row: 0, col: 3 }, // Vertical Block C
+            4: { id: 4, row: 2, col: 0 }, // Vertical Block D
+            5: { id: 5, row: 2, col: 3 }, // Vertical Block F
+            6: { id: 6, row: 2, col: 1 }, // Horizontal Block E
+            7: { id: 7, row: 3, col: 1 }, // Small Block G
+            8: { id: 8, row: 3, col: 2 }, // Small Block H
+            9: { id: 9, row: 4, col: 0 }, // Small Block I
+            10: { id: 10, row: 4, col: 3 }, // Small Block J
+        };
+
+        // Goal: Master block (ID 1) should be at row 3, column 1 (bottom center)
+        const GOAL_MASTER_POS = { row: 3, col: 1 };
+        const MASTER_BLOCK_ID = 1;
+
+        // Add a limit to the number of states visited to prevent memory issues
+        const MAX_VISITED_STATES = 500000; // Adjust this value as needed for performance vs. solution depth
+
+        // DOM elements
+        const boardContainer = document.getElementById('board-container');
+        const solveButton = document.getElementById('solve-button');
+        const messageDisplay = document.getElementById('message');
+        const solutionControls = document.getElementById('solution-controls');
+        const prevStepButton = document.getElementById('prev-step-button');
+        const nextStepButton = document.getElementById('next-step-button');
+        const currentStepDisplay = document.getElementById('current-step-display');
+        const totalStepsDisplay = document.getElementById('total-steps');
+        const solutionStepsList = document.getElementById('solution-steps-list');
+
+        // Global state variables
+        let currentBlocks = JSON.parse(JSON.stringify(INITIAL_BLOCK_POSITIONS));
+        let currentGrid = [];
+        let solutionSteps = [];
+        let currentStepIndex = 0;
+        let isSolving = false;
+
+        /**
+         * Generates a 2D grid representation of the board based on current block positions.
+         * @param {object} blocks - Object containing block IDs as keys and their current {id, row, col} as values.
+         * @returns {number[][]} A 2D array representing the board.
+         */
+        function generateGridFromBlocks(blocks) {
+            const grid = Array(ROWS).fill(0).map(() => Array(COLS).fill(0));
+            for (const blockId in blocks) {
+                const block = blocks[blockId];
+                const type = BLOCK_TYPES[block.id];
+                for (let r = block.row; r < block.row + type.height; r++) {
+                    for (let c = block.col; c < block.col + type.width; c++) {
+                        if (r < ROWS && c < COLS) { // Ensure within bounds
+                            grid[r][c] = block.id;
+                        }
+                    }
+                }
+            }
+            return grid;
+        }
+
+        /**
+         * Renders the puzzle board based on the current grid and block positions.
+         * @param {number[][]} grid - The 2D array representing the board.
+         * @param {object} blocks - Current positions of all blocks.
+         */
+        function renderBoard(grid, blocks) {
+            boardContainer.innerHTML = ''; // Clear previous board
+            boardContainer.style.gridTemplateColumns = `repeat(${COLS}, minmax(60px, 1fr))`;
+            boardContainer.style.gridTemplateRows = `repeat(${ROWS}, minmax(60px, 1fr))`;
+            boardContainer.style.width = `${COLS * 60 + (COLS - 1) * 2 + 8}px`;
+            boardContainer.style.height = `${ROWS * 60 + (ROWS - 1) * 2 + 8}px`;
+
+            grid.forEach((row, rIdx) => {
+                row.forEach((cellId, cIdx) => {
+                    const block = blocks[cellId];
+                    if (block && block.row === rIdx && block.col === cIdx) {
+                        const type = BLOCK_TYPES[block.id];
+                        const isMaster = block.id === MASTER_BLOCK_ID;
+                        const isGoalPosition = isMaster && block.row === GOAL_MASTER_POS.row && block.col === GOAL_MASTER_POS.col;
+
+                        const blockDiv = document.createElement('div');
+                        blockDiv.className = `block ${isMaster ? 'master-block' : (block.id % 2 === 0 ? 'other-block-even' : 'other-block-odd')} ${isGoalPosition ? 'goal-position' : ''}`;
+                        blockDiv.style.gridColumn = `${cIdx + 1} / span ${type.width}`;
+                        blockDiv.style.gridRow = `${rIdx + 1} / span ${type.height}`;
+
+                        if (isMaster) {
+                            const starSpan = document.createElement('span');
+                            starSpan.className = 'master-star';
+                            starSpan.textContent = '★';
+                            blockDiv.appendChild(starSpan);
+                        }
+
+                        const idSpan = document.createElement('span');
+                        idSpan.className = 'block-id';
+                        idSpan.textContent = block.id;
+                        blockDiv.appendChild(idSpan);
+
+                        boardContainer.appendChild(blockDiv);
+                    } else if (cellId === 0) {
+                        const emptyCellDiv = document.createElement('div');
+                        emptyCellDiv.className = 'board-cell';
+                        boardContainer.appendChild(emptyCellDiv);
+                    }
+                    // Do nothing for cells that are part of a block but not its top-left
+                });
+            });
+        }
+
+        /**
+         * Gets all possible next states from a given puzzle state.
+         * @param {object} currentState - The current state of the puzzle ({blocks, grid, path}).
+         * @returns {Array<{newBlocks: object, newGrid: number[][], moveDescription: string}>} An array of possible next states.
+         */
+        function getPossibleMoves(currentState) {
+            const possibleMoves = [];
+            const currentGrid = currentState.grid;
+            const currentBlocks = currentState.blocks;
+
+            for (const blockId in currentBlocks) {
+                const block = currentBlocks[blockId];
+                const type = BLOCK_TYPES[block.id];
+
+                // Define possible directions: [dr, dc]
+                const directions = [[-1, 0, 'up'], [1, 0, 'down'], [0, -1, 'left'], [0, 1, 'right']];
+
+                for (const [dr, dc, directionName] of directions) {
+                    const newRow = block.row + dr;
+                    const newCol = block.col + dc;
+
+                    // Check if the new position is within board boundaries
+                    if (newRow < 0 || newRow + type.height > ROWS || newCol < 0 || newCol + type.width > COLS) {
+                        continue; // Out of bounds
+                    }
+
+                    // Check if the new cells are empty or currently occupied by this block
+                    let canMove = true;
+                    for (let r = newRow; r < newRow + type.height; r++) {
+                        for (let c = newCol; c < newCol + type.width; c++) {
+                            // If the target cell is occupied by another block, cannot move
+                            if (currentGrid[r][c] !== 0 && currentGrid[r][c] !== block.id) {
+                                canMove = false;
+                                break;
+                            }
+                        }
+                        if (!canMove) break;
+                    }
+
+                    if (canMove) {
+                        // Create a deep copy of blocks for the new state
+                        const newBlocks = JSON.parse(JSON.stringify(currentBlocks));
+                        newBlocks[block.id] = { ...newBlocks[block.id], row: newRow, col: newCol };
+                        const newGrid = generateGridFromBlocks(newBlocks);
+                        const moveDescription = `${type.name} ${directionName}`;
+                        possibleMoves.push({ newBlocks, newGrid, moveDescription });
+                    }
+                }
+            }
+            return possibleMoves;
+        }
+
+        /**
+         * Checks if the current state is the goal state.
+         * @param {object} blocks - Current positions of all blocks.
+         * @returns {boolean} True if the master block is at the goal position.
+         */
+        function isGoalState(blocks) {
+            const masterBlock = blocks[MASTER_BLOCK_ID];
+            return masterBlock.row === GOAL_MASTER_POS.row && masterBlock.col === GOAL_MASTER_POS.col;
+        }
+
+        /**
+         * Displays a message to the user.
+         * @param {string} msg - The message to display.
+         * @param {string} type - 'success', 'warning', or '' (default).
+         */
+        function displayMessage(msg, type = '') {
+            messageDisplay.textContent = msg;
+            messageDisplay.className = `message ${type}`;
+        }
+
+        /**
+         * Solves the puzzle using Breadth-First Search (BFS).
+         */
+        function solvePuzzle() {
+            if (isSolving) return;
+
+            isSolving = true;
+            solveButton.disabled = true;
+            displayMessage('Solving puzzle... this might take a moment.', 'warning');
+            solutionSteps = [];
+            currentStepIndex = 0;
+            solutionControls.style.display = 'none';
+            solutionStepsList.innerHTML = '';
+
+            const queue = [{
+                blocks: JSON.parse(JSON.stringify(INITIAL_BLOCK_POSITIONS)),
+                grid: generateGridFromBlocks(INITIAL_BLOCK_POSITIONS),
+                path: []
+            }];
+            const visited = new Set();
+            visited.add(JSON.stringify(generateGridFromBlocks(INITIAL_BLOCK_POSITIONS)));
+
+            let foundSolution = false;
+            let finalSolutionPath = [];
+
+            const processQueue = () => {
+                const startTime = performance.now();
+                while (queue.length > 0 && (performance.now() - startTime < 100) && visited.size < MAX_VISITED_STATES) {
+                    const { blocks, grid, path } = queue.shift();
+
+                    if (isGoalState(blocks)) {
+                        foundSolution = true;
+                        finalSolutionPath = path;
+                        break;
+                    }
+
+                    const moves = getPossibleMoves({ blocks, grid });
+                    for (const move of moves) {
+                        const newBlocks = move.newBlocks;
+                        const newGrid = move.newGrid;
+                        const newGridString = JSON.stringify(newGrid);
+
+                        if (!visited.has(newGridString)) {
+                            visited.add(newGridString);
+                            queue.push({
+                                blocks: newBlocks,
+                                grid: newGrid,
+                                path: [...path, move.moveDescription]
+                            });
+                        }
+                    }
+                }
+
+                if (foundSolution) {
+                    solutionSteps = finalSolutionPath;
+                    displayMessage(`Solution found in ${solutionSteps.length} moves!`, 'success');
+                    isSolving = false;
+                    solveButton.disabled = false;
+                    updateSolutionDisplay();
+                    solutionControls.style.display = 'block';
+                    applySolutionStep(0); // Show initial state
+                } else if (queue.length === 0) {
+                    displayMessage('No solution found for this configuration.', 'warning');
+                    isSolving = false;
+                    solveButton.disabled = false;
+                } else if (visited.size >= MAX_VISITED_STATES) {
+                    displayMessage(`Search limit (${MAX_VISITED_STATES} states) reached. No solution found within this limit.`, 'warning');
+                    isSolving = false;
+                    solveButton.disabled = false;
+                }
+                else {
+                    setTimeout(processQueue, 10); // Continue processing in next tick
+                }
+            };
+
+            processQueue(); // Start the BFS
+        }
+
+        /**
+         * Updates the display of solution steps and navigation buttons.
+         */
+        function updateSolutionDisplay() {
+            totalStepsDisplay.textContent = solutionSteps.length;
+            currentStepDisplay.textContent = `Step ${currentStepIndex} / ${solutionSteps.length}`;
+
+            prevStepButton.disabled = currentStepIndex === 0;
+            nextStepButton.disabled = currentStepIndex === solutionSteps.length;
+
+            solutionStepsList.innerHTML = '';
+            solutionSteps.forEach((step, index) => {
+                const p = document.createElement('p');
+                p.textContent = `${index + 1}. ${step}`;
+                if (index + 1 === currentStepIndex) {
+                    p.classList.add('active-step');
+                }
+                solutionStepsList.appendChild(p);
+            });
+            // Scroll to active step
+            const activeStepElement = solutionStepsList.querySelector('.active-step');
+            if (activeStepElement) {
+                activeStepElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        /**
+         * Applies a specific step from the solution path to the board.
+         * @param {number} stepIdx - The index of the step to apply (0 for initial state).
+         */
+        function applySolutionStep(stepIdx) {
+            currentStepIndex = stepIdx;
+            let tempBlocks = JSON.parse(JSON.stringify(INITIAL_BLOCK_POSITIONS));
+
+            for (let i = 0; i < stepIdx; i++) {
+                const moveDescription = solutionSteps[i];
+                const [blockName, direction] = moveDescription.split(' ');
+                const blockId = Object.keys(BLOCK_TYPES).find(id => BLOCK_TYPES[id].name === blockName);
+
+                if (!blockId) continue;
+
+                const block = tempBlocks[blockId];
+                const type = BLOCK_TYPES[block.id];
+
+                let dr = 0, dc = 0;
+                if (direction === 'up') dr = -1;
+                else if (direction === 'down') dr = 1;
+                else if (direction === 'left') dc = -1;
+                else if (direction === 'right') dc = 1;
+
+                block.row += dr;
+                block.col += dc;
+                tempBlocks[blockId] = block;
+            }
+            currentBlocks = tempBlocks;
+            currentGrid = generateGridFromBlocks(currentBlocks);
+            renderBoard(currentGrid, currentBlocks);
+            updateSolutionDisplay();
+        }
+
+        // Event Listeners
+        solveButton.addEventListener('click', solvePuzzle);
+        prevStepButton.addEventListener('click', () => applySolutionStep(currentStepIndex - 1));
+        nextStepButton.addEventListener('click', () => applySolutionStep(currentStepIndex + 1));
+
+        // Initial render on page load
+        window.onload = function() {
+            currentGrid = generateGridFromBlocks(currentBlocks);
+            renderBoard(currentGrid, currentBlocks);
+            displayMessage('Click "Solve Puzzle" to find a solution.');
+        };
+    </script>
+</body>
+</html>
