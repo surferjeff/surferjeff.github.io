@@ -62,6 +62,12 @@ const generateGridFromBlocks = (blocks) => {
     return grid;
 };
 
+const keyMap = ['0', '1', '2', '2', '2', '2', '6', '7', '7', '7', '7'];
+
+function gridKey(grid) {
+  return grid.flatMap(row => row.map(n => keyMap[n])).join('');
+}
+
 /**
  * Represents a puzzle state.
  * @typedef {object} PuzzleState
@@ -183,7 +189,7 @@ function App() {
                 for (const move of moves) {
                     const newBlocks = move.newBlocks;
                     const newGrid = move.newGrid;
-                    const newGridString = JSON.stringify(newGrid);
+                    const newGridString = gridKey(newGrid);
 
                     if (!visited.has(newGridString)) {
                         visited.add(newGridString);
