@@ -179,7 +179,7 @@ function solve(start) {
             }
         }
     }
-    throw new Error("Examined", limit, "moves and haven't found a solution!");
+    throw new Error(`Examined ${limit} moves and haven't found a solution!`);
 }
 
 /**
