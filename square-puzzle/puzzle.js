@@ -219,7 +219,7 @@ async function solveIt() {
     const steps = reverseSolution(solve(start));
     for (const step of steps.slice(1)) {
         renderBoard(step.board);
-        await new Promise(resolve => window.setTimeout(resolve, 1500));
+        await new Promise(resolve => window.setTimeout(resolve, 700));
     }
     const el = document.getElementById("B");
     el.style.top = "520px";
