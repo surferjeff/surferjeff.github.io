@@ -83,6 +83,7 @@ function App() {
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [isSolving, setIsSolving] = useState(false);
     const [message, setMessage] = useState('');
+    const [solveStart, setSolveStart] = useState(null);
 
     // Memoize the initial grid generation
     useEffect(() => {
@@ -159,6 +160,7 @@ function App() {
         setMessage('Solving puzzle... this might take a moment.');
         setSolutionSteps([]);
         setCurrentStepIndex(0);
+        setSolveStart(performance.now());
 
         const queue = [{
             blocks: INITIAL_BLOCK_POSITIONS,
@@ -205,6 +207,7 @@ function App() {
             console.log(`Visited states: ${visited.size}, Queue size: ${queue.length}`); // For debugging
 
             if (foundSolution) {
+                console.log(`Elapsed ms: ${(performance.now() - solveStart) / 1000}`);
                 setSolutionSteps(solutionPath);
                 setMessage(`Solution found in ${solutionPath.length} moves!`);
                 setCurrentBlocks(INITIAL_BLOCK_POSITIONS); // Reset to initial state for display
