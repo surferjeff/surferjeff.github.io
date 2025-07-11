@@ -480,6 +480,13 @@
             messageDisplay.className = `message ${type}`;
         }
 
+        const fingerprintMap = [ '0', '1', '2', '2', '2', '2', '6',
+            '7', '7', '7', '7' ];
+
+        function fingerprint(grid) {
+            return grid.flatMap(row => row.map(n => fingerprintMap[n])).join('');
+        }
+
         /**
          * Solves the puzzle using Breadth-First Search (BFS).
          */
@@ -500,7 +507,7 @@
                 path: []
             }];
             const visited = new Set();
-            visited.add(JSON.stringify(generateGridFromBlocks(INITIAL_BLOCK_POSITIONS)));
+            visited.add(fingerprint(generateGridFromBlocks(INITIAL_BLOCK_POSITIONS)));
 
             let foundSolution = false;
             let finalSolutionPath = [];
@@ -520,7 +527,7 @@
                     for (const move of moves) {
                         const newBlocks = move.newBlocks;
                         const newGrid = move.newGrid;
-                        const newGridString = JSON.stringify(newGrid);
+                        const newGridString = fingerprint(newGrid);
 
                         if (!visited.has(newGridString)) {
                             visited.add(newGridString);
