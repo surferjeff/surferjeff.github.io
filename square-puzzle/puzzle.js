@@ -140,7 +140,7 @@ const sigLetters = {
 /**
  * Solves the puzzle.
  * @param {string} start - The starting board
- * @returns - a linked list of moves in reverse order.
+ * @returns - An array of moves.
  */
 function solve(start) {
     // Perform a breadth-first-search through the game tree.
@@ -164,7 +164,13 @@ function solve(start) {
         for (const m of moves) {
             const b = move(board, m.letter, m.step);
             if (/.............BB..BB./.test(b)) {
-                return {board: b, move: m, prev: top};
+                // Reverse the linked list so first step is first step.
+                const steps = [{board: b, move: m, prev: top}];
+                while (top) {
+                    steps.push(top);
+                    top = top.prev;
+                }
+                return steps.reverse();
             }
             const signature = b.replace(/./g, match => sigLetters[match]);
             if (!visited.has(signature)) {
@@ -174,22 +180,6 @@ function solve(start) {
         }
     }
     throw new Error("Examined", limit, "moves and haven't found a solution!");
-}
-
-/**
- * Reverses a linked list.
- * @param {linked list} finalStep - return value from solve().
- * @returns An array of steps to follow to solve the puzzle.
- */
-function reverseSolution(finalStep) {
-    const steps = [];
-    let step = finalStep;
-    while (step) {
-        steps.push(step);
-        step = step.prev;
-    }
-    steps.reverse();
-    return steps;
 }
 
 /**
@@ -216,7 +206,7 @@ function renderBoard(board) {
  */
 async function solveIt() {
     document.getElementById("solve-it").style.display = "none";
-    const steps = reverseSolution(solve(start));
+    const steps = solve(start);
     for (const step of steps.slice(1)) {
         renderBoard(step.board);
         await new Promise(resolve => window.setTimeout(resolve, 700));
@@ -227,7 +217,7 @@ async function solveIt() {
 
 if (typeof(process) !== 'undefined' && process?.versions?.node) {
     // Solve the puzzle, and writes the solution to the console.
-    const steps = reverseSolution(solve(start));
+    const steps = solve(start);
     for (const [i, step] of steps.entries()) {
         if (step.move) {
             console.log(String(i).padStart(3, " "), "Move", step.move.letter,
